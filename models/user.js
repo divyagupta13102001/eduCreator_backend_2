@@ -13,10 +13,11 @@ const UserSchema = new mongoose.Schema({
     degree: { type: String, required: function() { return this.userType === 'student'; } }, // Only for students
     dob: { type: Date, required: true }, // Only for students
     yearOfCompletion: { type: Number, required: function() { return this.userType === 'student'; } },// Only for students
-    placeOfWork: { type: String, required: function() { return this.userType === 'teacher'; } }, // Only for teachers
-    jobProfile: { type: String, required: function() { return this.userType === 'teacher'; } }, // Only for teachers
-    yearOfExperience: { type: Number, required: function() { return this.userType === 'teacher'; } }, // Only for teachers
-    identityCard: { type: String } // Only for teachers, store the path to the identity card
+    placeOfWork: { type: String, required: function() { return this.userType === 'teacher'; } }, 
+    jobProfile: { type: String, required: function() { return this.userType === 'teacher'; } }, 
+    yearOfExperience: { type: Number, required: function() { return this.userType === 'teacher'; } }, 
+    identityCard: { type: String },
+    bio:{ type:String }
 });
 
 module.exports = mongoose.model('User', UserSchema);
