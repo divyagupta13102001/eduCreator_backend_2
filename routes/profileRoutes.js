@@ -23,7 +23,8 @@ router.get('/getprofile/:userId', async (req, res) => {
             userType: user.userType,
             profilePhoto: user.profilePhoto,
             dob: user.dob,
-            password: user.password
+            password: user.password,
+            bio: user.bio
         };
 
         if (user.userType === 'student') {

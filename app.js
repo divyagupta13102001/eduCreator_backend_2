@@ -23,7 +23,9 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/posts', require('./routes/posts'));
 app.use('/api/comments', require('./routes/comments'));
 app.use('/api/follows', require('./routes/follows'));
-app.use('/api/user',require("./routes/profileRoutes"))
+app.use('/api/user',require("./routes/profileRoutes"));
+app.use('/api/topics',require("./routes/topics"));
+app.use('/api/user',require('./routes/subjects'));
 
 // Route for uploading profile photo
 app.post('/api/upload-profile-photo', upload.single('profilePhoto'), (req, res) => {

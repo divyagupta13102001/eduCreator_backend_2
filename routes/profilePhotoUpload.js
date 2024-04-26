@@ -9,9 +9,9 @@ const upload = multer({ dest: 'uploads/' });
 const router = express.Router();
 
 // Route for uploading profile photo
-router.post('/upload-profile-photo', authMiddleware, upload.single('profilePhoto'), async (req, res) => {
+router.post('/upload-profile-photo/:userId', upload.single('profilePhoto'), async (req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.params.userId; 
 
         // Find user by ID
         const user = await User.findById(userId);

@@ -17,7 +17,10 @@ const UserSchema = new mongoose.Schema({
     jobProfile: { type: String, required: function() { return this.userType === 'teacher'; } }, 
     yearOfExperience: { type: Number, required: function() { return this.userType === 'teacher'; } }, 
     identityCard: { type: String },
-    bio:{ type:String }
+    bio:{ type:String },
+    selectedSubjects: [{
+        type: String,
+      }]
 });
 
 module.exports = mongoose.model('User', UserSchema);
