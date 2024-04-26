@@ -6,6 +6,16 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 
 // Route to get user profile information
+router.get('/search', async (req, res) => {
+    try {
+      const searchQuery = req.query.q;
+      const users = await User.find({ username: { $regex: searchQuery, $options: 'i' } });
+      res.json(users);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server Error' });
+    }
+  });
 router.get('/getprofile/:userId', async (req, res) => {
     try {
         const userId = req.params.userId; 
