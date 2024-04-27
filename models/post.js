@@ -7,7 +7,7 @@ const PostSchema = new mongoose.Schema({
         url: { type: String, required: true }
     },
     author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    tag: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject' },
+    tag: { type: String, required: true  },
     createdAt: { type: Date, default: Date.now },
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }]
 });

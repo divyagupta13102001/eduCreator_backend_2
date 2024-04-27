@@ -2,9 +2,9 @@ const express = require('express');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const Post = require('../models/post');
-
 const router = express.Router();
-
+const User = require('../models/user');
+const Subject = require('../models/Subject');
 // Configure multer for file upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -28,8 +28,8 @@ cloudinary.config({
     api_secret: 'czAJFZ0rrcBGR5s4Nqguzje545A' 
   });
 
-// Route to handle file upload
-router.post('/upload', upload.single('photo'), async (req, res) => {
+
+router.post('/upload/:userId/:subjectId', upload.single('photo'), async (req, res) => {
   try {
     // Check if file was uploaded
     if (!req.file) {
@@ -39,14 +39,30 @@ router.post('/upload', upload.single('photo'), async (req, res) => {
     // Upload file to cloudinary
     const result = await cloudinary.uploader.upload(req.file.path);
 
-    // Save photo metadata in database
+    const userId = req.params.userId;
+    const subjectId = req.params.subjectId;
+
+    // Find user by user ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Find subject by subject ID
+    const subject = await Subject.findById(subjectId);
+    if (!subject) {
+      return res.status(404).json({ error: 'Subject not found' });
+    }
+
+    // Save photo metadata in database along with user and subject information
     const newPost = new Post({
       caption: req.body.caption,
       content: {
         public_id: result.public_id,
         url: result.secure_url
       },
-      tag:req.body.caption,
+      author: user._id,
+      tag: subject.name
     });
     await newPost.save();
 
@@ -62,161 +78,54 @@ router.post('/upload', upload.single('photo'), async (req, res) => {
   }
 });
 
+
+router.get('/posts', async (req, res) => {
+  try {
+    // Fetch posts from the database
+    const posts = await Post.find().populate('author', 'username').populate('tag', 'name').exec();
+
+    // Map the posts to include author username and subject tag name
+    const formattedPosts = posts.map(post => ({
+      _id: post._id,
+      caption: post.caption,
+      content: post.content,
+      author: post.author.username, // Retrieve username from populated author field
+      tag: post.tag.name // Retrieve name from populated tag field
+    }));
+
+    res.status(200).json(formattedPosts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server Error' });
+  }
+});
+
+
+
+
+router.get('/posts/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    // Find user by user ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Find subjects selected by the user
+    const selectedSubjects = user.selectedSubjects;
+
+    // Fetch posts related to the selected subjects
+    const posts = await Post.find({ tag: { $in: selectedSubjects } })
+      .populate('author', 'username') 
+      .populate('tag', 'name'); // Populate tag field with name of subject
+
+    res.json(posts);0
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server Error' });
+  }
+});
+
 module.exports = router;
-
-
-
-
-
-
-// const express = require('express');
-// const multer = require('multer');
-// const path = require('path');
-// const Post = require('../models/post');
-// const Subject = require('../models/Subject'); 
-// const User = require("../models/user");
-// const cloudinary = require("cloudinary");
-// const router = express.Router();
-// router.post('/uploadPost/:userId', async (req, res) => {
-//   try {
-//     const userId = req.params.userId; 
-//     const myCloud = await cloudinary.v2.uploader.upload(req.body.image, {
-//       folder: "posts",
-//     });
-//     const newPostData = {
-//       caption: req.body.caption,
-//       content: {
-//         public_id: myCloud.public_id,
-//         url: myCloud.secure_url,
-//       },
-//       author: req.user.userId,
-//       tag:req.body.tag,
-//     };
-
-//     const post = await Post.create(newPostData);
-
-//     const user = await User.findById(req.user.userId);
-
-//     user.posts.unshift(post._id);
-
-//     await user.save();
-//     res.status(201).json({
-//       success: true,
-//       message: "Post created",
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// });
-// module.exports = router;
-// // // Create Post
-// // router.post('/', async (req, res) => {
-// //     try {
-// //         const { content, author } = req.body;
-
-// //         const post = new Post({ content, author });
-// //         await post.save();
-
-// //         res.status(201).json({ message: 'Post created successfully', post });
-// //     } catch (err) {
-// //         console.error(err.message);
-// //         res.status(500).send('Server Error');
-// //     }
-// // });
-
-// // // Get All Posts
-// // router.get('/', async (req, res) => {
-// //     try {
-// //         const posts = await Post.find().populate('author', 'username');
-// //         res.json(posts);
-// //     } catch (err) {
-// //         console.error(err.message);
-// //         res.status(500).send('Server Error');
-// //     }
-// // });
-
-// // // Get Post by ID
-// // router.get('/:postId', async (req, res) => {
-// //     try {
-// //         const post = await Post.findById(req.params.postId).populate('author', 'username');
-// //         if (!post) {
-// //             return res.status(404).json({ message: 'Post not found' });
-// //         }
-// //         res.json(post);
-// //     } catch (err) {
-// //         console.error(err.message);
-// //         res.status(500).send('Server Error');
-// //     }
-// // });
-
-// // // Update Post
-// // router.put('/:postId', async (req, res) => {
-// //     try {
-// //         const { content } = req.body;
-
-// //         let post = await Post.findById(req.params.postId);
-// //         if (!post) {
-// //             return res.status(404).json({ message: 'Post not found' });
-// //         }
-
-// //         post.content = content;
-// //         await post.save();
-
-// //         res.json({ message: 'Post updated successfully', post });
-// //     } catch (err) {
-// //         console.error(err.message);
-// //         res.status(500).send('Server Error');
-// //     }
-// // });
-
-// // // Delete Post
-// // router.delete('/:postId', async (req, res) => {
-// //     try {
-// //         const post = await Post.findById(req.params.postId);
-// //         if (!post) {
-// //             return res.status(404).json({ message: 'Post not found' });
-// //         }
-
-// //         await post.remove();
-
-// //         res.json({ message: 'Post deleted successfully' });
-// //     } catch (err) {
-// //         console.error(err.message);
-// //         res.status(500).send('Server Error');
-// //     }
-// // });
-
-// // module.exports = router;
-// // // const express = require("express");
-// // // const {
-// // //   createPost,
-// // //   likeAndUnlikePost,
-// // //   deletePost,
-// // //   getPostOfFollowing,
-// // //   updateCaption,
-// // //   commentOnPost,
-// // //   deleteComment,
-// // // } = require("../controllers/post");
-// // // const { isAuthenticated } = require("../middlewares/auth");
-
-// // // const router = express.Router();
-
-// // // router.route("/post/upload").post(createPost);
-
-// // // router
-// // //   .route("/post/:id")
-// // //   .get(likeAndUnlikePost)
-// // //   .put(updateCaption)
-// // //   .delete(deletePost);
-
-// // // router.route("/posts").get( getPostOfFollowing);
-
-// // // router
-// // //   .route("/post/comment/:id")
-// // //   .put(commentOnPost)
-// // //   .delete(deleteComment);
-
-// // // module.exports = router;
