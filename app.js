@@ -19,8 +19,7 @@ app.use(cors())
 const MONGO = process.env.MONGO_URI
 // Connect to MongoDB
 mongoose.connect(MONGO, {
-    useNewUrlParser: true,
-  useUnifiedTopology: true
+
 })
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error('MongoDB connection error:', err));
@@ -101,11 +100,21 @@ io.on('connection', (socket) => {
       console.log(`User ${userId} joined chat with User ${otherUserId}`);
     });
   
-    socket.on('send message', (data) => {
-      const { sender, receiver, message } = data;
-      const room = generateRoomId(sender, receiver);
-      io.to(room).emit('receive message', { sender, message });
-    });
+    socket.on('send message', async (data) => {
+        try {
+            const { sender, receiver, message } = data;
+            const room = generateRoomId(sender, receiver);
+      
+            // Save the message to the database
+            const newMessage = new Message({ sender, receiver, message });
+            await newMessage.save();
+      
+            // Emit the message to the room
+            io.to(room).emit('receive message', { sender, message });
+          } catch (error) {
+            console.error('Error saving and sending message:', error);
+          }
+        });
   
     socket.on('disconnect', () => {
       console.log('Client disconnected');
