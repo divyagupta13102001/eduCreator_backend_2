@@ -28,10 +28,11 @@ mongoose.connect(MONGO, {
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/posts', require('./routes/posts'));
 app.use('/api/comments', require('./routes/comments'));
-app.use('/api/follows', require('./routes/follows'));
+app.use('/api/follows', require('./routes/follow'));
 app.use('/api/user',require("./routes/profileRoutes"));
 app.use('/api/topics',require("./routes/topics"));
 app.use('/api/user',require('./routes/subjects'));
+
 
 
 

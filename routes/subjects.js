@@ -14,14 +14,11 @@ router.get('/subjects', async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 });
-// server/routes/subjects.js
-
 
 // Route to seed subjects (insert subjects into the database)
 router.post('/seed', async (req, res) => {
   try {
-    
-    const subjectsData = [
+      const subjectsData = [
       { name: 'Science', description: 'The study of the natural world and phenomena.' },
       { name: 'Technology', description: 'The application of scientific knowledge for practical purposes.' },
       { name: 'Art', description: 'Creative expression of human imagination and skill.' },
@@ -32,10 +29,9 @@ router.post('/seed', async (req, res) => {
       { name: 'Music', description: 'Art form and cultural activity whose medium is sound and silence.' },
       { name: 'Psychology', description: 'The scientific study of the mind and behavior.' },
       { name: 'Sociology', description: 'The study of society, patterns of social relationships, social interaction, and culture.' },
-      // Add more subjects as needed
+
     ];
 
-    // Insert subjects into the database
     const insertedSubjects = await Subject.insertMany(subjectsData);
 
     res.json({ message: 'Subjects seeded successfully', subjects: insertedSubjects });
@@ -44,8 +40,6 @@ router.post('/seed', async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 });
-
-module.exports = router;
 
 // Route to update user's selected subjects
 router.post('/:userId/subjects', async (req, res) => {
@@ -80,32 +74,25 @@ router.get('/:userId/getsubjects', async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
-  
     const selectedSubjectNames = user.selectedSubjects;
-
-  
     const subjects = await Subject.find({ name: { $in: selectedSubjectNames } });
-
     res.json(subjects);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
 });
+
 router.patch('/:userId/updatesubjects', async (req, res) => {
   const userId = req.params.userId;
   const { selectedSubjects } = req.body;
-
   try {
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
     user.selectedSubjects = selectedSubjects;
     await user.save();
-
     res.json({ message: 'Selected subjects updated successfully' });
   } catch (error) {
     console.error(error);

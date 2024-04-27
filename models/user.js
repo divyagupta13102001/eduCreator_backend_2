@@ -20,7 +20,8 @@ const UserSchema = new mongoose.Schema({
     bio:{ type:String },
     selectedSubjects: [{
         type: String,
-      }]
+      }],
+      fileUrls: [String],
 });
 
 module.exports = mongoose.model('User', UserSchema);
