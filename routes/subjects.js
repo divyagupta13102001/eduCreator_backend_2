@@ -75,19 +75,38 @@ router.get('/:userId/getsubjects', async (req, res) => {
   const userId = req.params.userId;
 
   try {
-    // Find the user by ID
+
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Get the selected subject names from the user document
+  
     const selectedSubjectNames = user.selectedSubjects;
 
-    // Find subjects based on the selected subject names
+  
     const subjects = await Subject.find({ name: { $in: selectedSubjectNames } });
 
     res.json(subjects);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+router.patch('/:userId/updatesubjects', async (req, res) => {
+  const userId = req.params.userId;
+  const { selectedSubjects } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.selectedSubjects = selectedSubjects;
+    await user.save();
+
+    res.json({ message: 'Selected subjects updated successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
