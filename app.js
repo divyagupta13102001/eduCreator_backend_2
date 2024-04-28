@@ -32,19 +32,8 @@ app.use('/api/follows', require('./routes/follow'));
 app.use('/api/user',require("./routes/profileRoutes"));
 app.use('/api/topics',require("./routes/topics"));
 app.use('/api/user',require('./routes/subjects'));
+app.use('/api/user',require('./routes/profilePhotoUpload'));
 
-
-
-
-app.post('/api/upload-profile-photo', upload.single('profilePhoto'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ message: 'No file uploaded' });
-    }
-    
-    console.log(req.file);
-    
-    res.status(200).json({ message: 'File uploaded successfully' });
-});
 
 
 const server = http.createServer(app);
