@@ -65,7 +65,7 @@ router.get('/profile-photo/:userId', async (req, res) => {
     }
 });
 // PATCH profile photo API
-router.patch('/profile-photo/:userId', upload.single('photo'), async (req, res) => {
+router.patch('/update-profile-photo/:userId', upload.single('photo'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });

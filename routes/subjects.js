@@ -19,17 +19,31 @@ router.get('/subjects', async (req, res) => {
 router.post('/seed', async (req, res) => {
   try {
       const subjectsData = [
-      { name: 'Science', description: 'The study of the natural world and phenomena.' },
-      { name: 'Technology', description: 'The application of scientific knowledge for practical purposes.' },
-      { name: 'Art', description: 'Creative expression of human imagination and skill.' },
-      { name: 'History', description: 'Study of past events, particularly in human affairs.' },
-      { name: 'Philosophy', description: 'Critical thinking about fundamental questions regarding existence, knowledge, values, reason, mind, and language.' },
-      { name: 'Mathematics', description: 'The study of numbers, quantity, structures, space, and change.' },
-      { name: 'Literature', description: 'Written works, especially those considered of superior or lasting artistic merit.' },
-      { name: 'Music', description: 'Art form and cultural activity whose medium is sound and silence.' },
-      { name: 'Psychology', description: 'The scientific study of the mind and behavior.' },
-      { name: 'Sociology', description: 'The study of society, patterns of social relationships, social interaction, and culture.' },
-
+      { name: 'Coding Languages', description: 'Programming languages used to write instructions for computers.' },
+      { name: 'Game Development', description: 'The process of creating video games, including design, development, and testing.' },
+      { name: 'Political Science', description: 'The study of politics, government systems, and political behavior.' },
+      { name: 'Biology', description: 'The study of living organisms and their interactions with each other and their environments.' },
+      { name: 'Chemistry', description: 'The study of matter, its properties, composition, and reactions.' },
+      { name: 'Physics', description: 'The study of matter, energy, and the fundamental forces of nature.' },
+      { name: 'Economics', description: 'The study of how individuals, businesses, and governments allocate resources to satisfy their needs and wants.' },
+      { name: 'Art History', description: 'The study of visual art and its historical development and stylistic contexts.' },
+      { name: 'Environmental Science', description: 'The study of the natural world and the impact of human activity on ecosystems.' },
+      { name: 'Data Structures and Algorithms', description: 'Study of organizing and managing data effectively and algorithms for solving computational problems efficiently.' },
+      { name: 'Web Development', description: 'The creation of websites and web applications using technologies like HTML, CSS, and JavaScript.' },
+      { name: 'Mobile App Development', description: 'Development of applications for mobile devices, including iOS and Android platforms.' },
+      { name: 'Machine Learning', description: 'A subset of artificial intelligence that focuses on developing algorithms that enable computers to learn from and make predictions based on data.' },
+      { name: 'Blockchain Technology', description: 'A decentralized digital ledger technology used to record transactions across multiple computers.' },
+      { name: 'Cybersecurity', description: 'The practice of protecting systems, networks, and data from digital attacks.' },
+      { name: 'Game Design', description: 'The process of designing the content and rules of a game, including gameplay, mechanics, and storyline.' },
+      { name: 'Digital Marketing', description: 'The use of digital channels such as social media, email, and search engines to promote products or services.' },
+      { name: 'Graphic Design', description: 'The art of visual communication through the use of typography, photography, iconography, and illustration.' },
+      { name: 'UI/UX Design', description: 'The design of user interfaces and user experiences for digital products, focusing on usability and visual aesthetics.' },
+      { name: 'Photography', description: 'The art, science, and practice of capturing images using light, lenses, and cameras.' },
+      { name: 'Animation', description: 'The process of creating moving images from static drawings, models, or computer-generated graphics.' },
+      { name: 'Architecture', description: 'The art and science of designing and constructing buildings and other physical structures.' },
+      { name: 'Interior Design', description: 'The design of interior spaces to enhance the function, safety, and aesthetics of a building.' },
+      { name: 'Civil Engineering', description: 'The design, construction, and maintenance of infrastructure projects such as roads, bridges, and buildings.' },
+      { name: 'Artificial Intelligence', description: 'The simulation of human intelligence processes by machines, especially computer systems.' },
     ];
 
     const insertedSubjects = await Subject.insertMany(subjectsData);
