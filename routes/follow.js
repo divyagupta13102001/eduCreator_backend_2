@@ -93,5 +93,36 @@ router.get('/followers/:userId', async (req, res) => {
       res.status(500).json({ error: 'Server Error' });
     }
   });
-  
+  // Assuming you have a User model defined using Mongoose
+
+
+// Express route for unfollowing a user
+router.post('/:teacherId/unfollow/:userId', async (req, res) => {
+    const  userId  = req.params.userId;
+    const teacherId  = req.params.teacherId;
+
+    try {
+        // Find the current user
+        const user = await User.findById(teacherId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Remove the userId from the followed users list
+        const index = user.following.indexOf(userId);
+        if (index === -1) {
+            return res.status(404).json({ error: 'User is not being followed' });
+        }
+        user.following.splice(index, 1);
+
+        // Save the updated user
+        await user.save();
+
+        res.status(200).json({ message: 'Unfollowed user successfully' });
+    } catch (error) {
+        console.error('Error unfollowing user:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 module.exports = router;

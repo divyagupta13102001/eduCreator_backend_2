@@ -84,5 +84,30 @@ router.patch('/update-profile-photo/:userId', upload.single('photo'), async (req
         res.status(500).json({ message: 'Server Error' });
     }
 });
+router.post('/upload-Id/:userId', upload.single('photo'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+        const userId = req.params.userId;
 
+        // Find user by ID
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        if(user.userType==='student'){
+            return res.status(404).json({ message: 'User not allowed' }); 
+        }
+        const result = await cloudinary.uploader.upload(req.file.path);
+
+        user.identityCard = result.secure_url;
+        await user.save();
+
+        res.status(200).json({ message: 'id photo uploaded successfully' });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
 module.exports = router;

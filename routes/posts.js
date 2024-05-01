@@ -100,7 +100,7 @@ router.post('/upload/:userId/:subjectId', upload.array('files'), async (req, res
 router.get('/postsBy/:userId', async (req, res) => {
   try {
     const userId = req.params.userId; 
-
+    const actualUserId=req.body;
     // Fetch posts from the database for the specified user ID
     const posts = await Post.find({ 'author': userId }).populate('author', 'username').populate('tag', 'name').exec();
 
@@ -109,9 +109,9 @@ router.get('/postsBy/:userId', async (req, res) => {
       _id: post._id,
       caption: post.caption,
       content: post.content,
-      author: post.author.username, 
+      author: post.author, 
       tag: post.tag ,
-    
+      liked: post.likes.includes(actualUserId)
     }));
 
     res.status(200).json(formattedPosts);
@@ -125,6 +125,7 @@ router.get('/postsBy/:userId', async (req, res) => {
 router.get('/posts/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
+    
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });

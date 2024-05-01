@@ -16,7 +16,7 @@ const UserSchema = new mongoose.Schema({
     placeOfWork: { type: String, required: function() { return this.userType === 'teacher'; } }, 
     jobProfile: { type: String, required: function() { return this.userType === 'teacher'; } }, 
     yearOfExperience: { type: Number, required: function() { return this.userType === 'teacher'; } }, 
-    identityCard: { type: String },
+    identityCard: { type: String  }, 
     bio:{ type:String },
     selectedSubjects: [{
         type: String,
