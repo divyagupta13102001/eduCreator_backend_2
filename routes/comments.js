@@ -5,6 +5,7 @@ const Comment = require('../models/comment');
 const Post = require('../models/post');
 const User = require('../models/user');
 const mongoose = require('mongoose');
+
 router.post('/:postId/comments/:userId', async (req, res) => {
     const postId = req.params.postId;
     const userId = req.params.userId;

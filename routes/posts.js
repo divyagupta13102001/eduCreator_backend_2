@@ -110,7 +110,7 @@ router.get('/postsBy/:userId', async (req, res) => {
       caption: post.caption,
       content: post.content,
       author: post.author.username, 
-      tag: post.tag.name ,
+      tag: post.tag ,
     
     }));
 
@@ -138,7 +138,7 @@ router.get('/posts/:userId', async (req, res) => {
         caption: post.caption,
         content: post.content,
         author: post.author,
-        tag: post.tag.name,
+        tag: post.tag,
         liked: post.likes.includes(userId) // Check if current user's ID is in the likes array
       })); 
     res.json(formattedPosts);
@@ -163,7 +163,7 @@ router.get('/postsByFollowing/:userId', async (req, res) => {
       caption: post.caption,
       content: post.content,
       author: post.author,
-      tag: post.tag.name,
+      tag: post.tag,
       liked: post.likes.includes(userId) // Check if current user's ID is in the likes array
     })); 
   res.json(formattedPosts);
