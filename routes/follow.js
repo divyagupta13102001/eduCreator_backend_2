@@ -101,9 +101,6 @@ router.get('/followers/:userId', async (req, res) => {
       const student = await User.findById(studentId);
       const teacher = await User.findById(teacherId);
   
-      if (!student || student.userType !== 'student') {
-        return res.status(404).json({ error: 'Student not found' });
-      }
   
       if (!teacher || teacher.userType !== 'teacher') {
         return res.status(404).json({ error: 'Teacher not found' });
