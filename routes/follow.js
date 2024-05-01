@@ -93,9 +93,29 @@ router.get('/followers/:userId', async (req, res) => {
       res.status(500).json({ error: 'Server Error' });
     }
   });
-  // Assuming you have a User model defined using Mongoose
+  
 
-
+  router.get('/check/:studentId/:teacherId', async (req, res) => {
+    try {
+      const { studentId, teacherId } = req.params;
+      const student = await User.findById(studentId);
+      const teacher = await User.findById(teacherId);
+  
+      if (!student || student.userType !== 'student') {
+        return res.status(404).json({ error: 'Student not found' });
+      }
+  
+      if (!teacher || teacher.userType !== 'teacher') {
+        return res.status(404).json({ error: 'Teacher not found' });
+      }
+  
+      const isFollowing = teacher.followers.includes(studentId);
+      res.status(200).json({ isFollowing });
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ error: 'Server Error' });
+    }
+  });
 // Express route for unfollowing a user
 router.post('/:teacherId/unfollow/:userId', async (req, res) => {
     const  userId  = req.params.userId;
