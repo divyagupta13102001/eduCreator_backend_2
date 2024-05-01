@@ -22,6 +22,8 @@ const UserSchema = new mongoose.Schema({
         type: String,
       }],
       fileUrls: [String],
+      likedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }]
 });
+
 
 module.exports = mongoose.model('User', UserSchema);

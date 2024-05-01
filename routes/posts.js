@@ -96,7 +96,7 @@ router.post('/upload/:userId/:subjectId', upload.array('files'), async (req, res
 });
 
 
-///get podt created by a teacher
+///get post created by a teacher
 router.get('/postsBy/:userId', async (req, res) => {
   try {
     const userId = req.params.userId; 
@@ -110,7 +110,8 @@ router.get('/postsBy/:userId', async (req, res) => {
       caption: post.caption,
       content: post.content,
       author: post.author.username, 
-      tag: post.tag.name 
+      tag: post.tag.name ,
+    
     }));
 
     res.status(200).json(formattedPosts);
@@ -124,27 +125,29 @@ router.get('/postsBy/:userId', async (req, res) => {
 router.get('/posts/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
-
-    // Find user by user ID
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-
-    // Find subjects selected by the user
     const selectedSubjects = user.selectedSubjects;
-
-    // Fetch posts related to the selected subjects
     const posts = await Post.find({ tag: { $in: selectedSubjects } })
       .populate('author', 'username') 
-      .populate('tag', 'name'); // Populate tag field with name of subject
-
-    res.json(posts);0
+      .populate('tag', 'name');
+      const formattedPosts = posts.map(post => ({
+        _id: post._id,
+        caption: post.caption,
+        content: post.content,
+        author: post.author,
+        tag: post.tag.name,
+        liked: post.likes.includes(userId) // Check if current user's ID is in the likes array
+      })); 
+    res.json(formattedPosts);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server Error' });
   }
 });
+
 router.get('/postsByFollowing/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -155,9 +158,108 @@ router.get('/postsByFollowing/:userId', async (req, res) => {
     const followingIds = user.following.map(user => user._id);
     const posts = await Post.find({ author: { $in: followingIds } }).populate('author', 'username');
 
-    res.status(200).json(posts);
+    const formattedPosts = posts.map(post => ({
+      _id: post._id,
+      caption: post.caption,
+      content: post.content,
+      author: post.author,
+      tag: post.tag.name,
+      liked: post.likes.includes(userId) // Check if current user's ID is in the likes array
+    })); 
+  res.json(formattedPosts);
   } catch (error) {
     console.error('Error fetching posts:', error);
+    res.status(500).json({ error: 'Server Error' });
+  }
+});
+router.delete('/posts/:postId/:userId', async (req, res) => {
+  try {
+    const postId = req.params.postId;
+    const userId = req.params.userId;
+
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+    if (post.author.toString() !== userId) {
+      return res.status(403).json({ error: 'Unauthorized: You are not the author of this post' });
+    }
+    await post.delete();
+
+    return res.status(200).json({ message: 'Post deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting post:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.post("/like/:postId/:userId" , async (req, res) => {
+  try {
+    const postId=req.params.postId
+    const userId=req.params.userId
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    if (post.likes.includes(userId)) {
+      const index = post.likes.indexOf(userId);
+      post.likes.splice(index, 1);
+      await post.save();
+      const userIndex = user.likedPosts.indexOf(postId);
+
+      if (userIndex !== -1) {
+        user.likedPosts.splice(userIndex, 1);
+        await user.save();
+      } 
+      return res.status(200).json({
+        success: true,
+        message: "Post Unliked",
+      });
+    } else {
+      post.likes.push(userId);
+      await post.save();
+
+      user.likedPosts.push(postId);
+      await user.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Post Liked",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+})
+router.get('/likedposts/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const likedPosts = await Post.find({ '_id': { $in: user.likedPosts } })
+      .populate('author', 'username')
+      .populate('tag', 'name');
+
+    res.json(likedPosts);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Server Error' });
   }
 });

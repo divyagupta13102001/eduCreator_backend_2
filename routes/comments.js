@@ -2,32 +2,74 @@
 const express = require('express');
 const router = express.Router();
 const Comment = require('../models/comment');
-
-// Add Comment
-router.post('/', async (req, res) => {
+const Post = require('../models/post');
+const User = require('../models/user');
+const mongoose = require('mongoose');
+router.post('/:postId/comments/:userId', async (req, res) => {
+    const postId = req.params.postId;
+    const userId = req.params.userId;
+  
     try {
-        const { content, author, post } = req.body;
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
 
-        const comment = new Comment({ content, author, post });
-        await comment.save();
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
 
-        res.status(201).json({ message: 'Comment added successfully', comment });
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        const newComment = new Comment({
+            content: req.body.content,
+            author: userId,
+            post: postId,
+        });
+
+        const savedComment = await newComment.save();
+        post.comments.push(savedComment._id);
+        await post.save();
+  
+        res.status(201).json({
+            message: "Successfully added",
+            post: post // Sending the updated post object as part of the response
+        });
+    } catch (error) {
+        res.status(500).json({ error: `Server error: ${error.message}` });
     }
 });
 
-// Get Comments by Post ID
-router.get('/post/:postId', async (req, res) => {
+
+
+router.get('/:postId/comments', async (req, res) => {
+    const { postId } = req.params;
+  
     try {
-        const comments = await Comment.find({ post: req.params.postId }).populate('author', 'username');
-        res.json(comments);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+      // Find the post by postId
+      const post = await Post.findById(postId).populate('comments');
+  
+      if (!post) {
+        return res.status(404).json({ error: 'Post not found' });
+      }
+  
+      // Extract relevant information for each comment
+      const comments = await Promise.all(post.comments.map(async (commentId) => {
+        const comment = await Comment.findById(commentId).populate('author', 'username');
+        return {
+          postId: comment.post,
+          commentId: comment._id,
+          username: comment.author.username,
+          content: comment.content,
+          createdAt: comment.createdAt
+        };
+      }));
+  
+      res.status(200).json(comments);
+    } catch (error) {
+      res.status(500).json({ error: `Server error: ${error.message}` });
     }
-});
+  });
+  
 
 // Update Comment
 router.put('/:commentId', async (req, res) => {
@@ -49,7 +91,6 @@ router.put('/:commentId', async (req, res) => {
     }
 });
 
-// Delete Comment
 router.delete('/:commentId', async (req, res) => {
     try {
         const comment = await Comment.findById(req.params.commentId);
@@ -57,11 +98,16 @@ router.delete('/:commentId', async (req, res) => {
             return res.status(404).json({ message: 'Comment not found' });
         }
 
+        // Ensure that the comment object is a Mongoose document
+        if (!(comment instanceof mongoose.Document)) {
+            return res.status(500).json({ message: 'Invalid comment object' });
+        }
+
         await comment.remove();
 
         res.json({ message: 'Comment deleted successfully' });
     } catch (err) {
-        console.error(err.message);
+        console.error(err); // Log the error to the console
         res.status(500).send('Server Error');
     }
 });

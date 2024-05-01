@@ -5,7 +5,7 @@ const User = require('../models/user');
 
 const router = express.Router();
 
-// Configure multer storage
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'uploads/');
@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
     }
 });
 
-// Initialize multer upload instance
+
 const upload = multer({ storage: storage });
 
 // Configure Cloudinary
