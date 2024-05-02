@@ -49,7 +49,6 @@ router.get('/:userId/messages/:otherUserId', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch messages' });
     }
 });
-
 router.get('/:userId/chatted-users', async (req, res) => {
     const userId = req.params.userId;
 
@@ -59,19 +58,17 @@ router.get('/:userId/chatted-users', async (req, res) => {
             $or: [{ sender: userId }, { receiver: userId }]
         });
 
-        // Extract unique sender and receiver IDs
         const userIDs = Array.from(new Set(messages.flatMap(message => [message.sender, message.receiver])));
 
-        // Remove the user's own ID from the list
         const otherUserIDs = userIDs.filter(id => id.toString() !== userId);
 
-        // Fetch user details based on the IDs
         const chattedUsers = await User.find({ _id: { $in: otherUserIDs } });
+        const chattedUsersList = chattedUsers.map(user => ({
+            userId: user._id,
+            username: user.username
+        }));
 
-        // Extract user names
-        const chattedUserNames = chattedUsers.map(user => user.username); // Use 'username' field
-
-        res.status(200).json(chattedUserNames);
+        res.status(200).json(chattedUsersList);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to fetch chatted users' });
