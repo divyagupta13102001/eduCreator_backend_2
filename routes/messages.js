@@ -50,6 +50,33 @@ router.get('/:userId/messages/:otherUserId', async (req, res) => {
     }
 });
 
+router.get('/:userId/chatted-users', async (req, res) => {
+    const userId = req.params.userId;
+
+    try {
+        // Find all messages where the user is either sender or receiver
+        const messages = await Message.find({
+            $or: [{ sender: userId }, { receiver: userId }]
+        });
+
+        // Extract unique sender and receiver IDs
+        const userIDs = Array.from(new Set(messages.flatMap(message => [message.sender, message.receiver])));
+
+        // Remove the user's own ID from the list
+        const otherUserIDs = userIDs.filter(id => id.toString() !== userId);
+
+        // Fetch user details based on the IDs
+        const chattedUsers = await User.find({ _id: { $in: otherUserIDs } });
+
+        // Extract user names
+        const chattedUserNames = chattedUsers.map(user => user.username); // Use 'username' field
+
+        res.status(200).json(chattedUserNames);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch chatted users' });
+    }
+});
 
 
 module.exports = router;
