@@ -33,7 +33,7 @@ app.use('/api/user',require("./routes/profileRoutes"));
 app.use('/api/topics',require("./routes/topics"));
 app.use('/api/user',require('./routes/subjects'));
 app.use('/api/user',require('./routes/profilePhotoUpload'));
-
+app.use('/api/messages', require("./routes/messages"))
 
 
 const server = http.createServer(app);

@@ -142,6 +142,8 @@ router.get('/posts/:userId', async (req, res) => {
         tag: post.tag,
         liked: post.likes.includes(userId) // Check if current user's ID is in the likes array
       })); 
+
+      
     res.json(formattedPosts);
   } catch (error) {
     console.error(error);
