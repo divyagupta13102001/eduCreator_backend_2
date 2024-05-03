@@ -118,31 +118,33 @@ router.get('/followers/:userId', async (req, res) => {
   });
 // Express route for unfollowing a user
 router.post('/:teacherId/unfollow/:userId', async (req, res) => {
-    const  userId  = req.params.userId;
-    const teacherId  = req.params.teacherId;
+  const userId = req.params.userId;
+  const teacherId = req.params.teacherId;
 
-    try {
-        // Find the current user
-        const user = await User.findById(teacherId);
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
+  try {
+      // Find the teacher
+      const teacher = await User.findById(teacherId);
+      if (!teacher) {
+          return res.status(404).json({ error: 'Teacher not found' });
+      }
 
-        // Remove the userId from the followed users list
-        const index = user.following.indexOf(userId);
-        if (index === -1) {
-            return res.status(404).json({ error: 'User is not being followed' });
-        }
-        user.following.splice(index, 1);
+      // Check if the user (student) exists in the teacher's followers list
+      const index = teacher.followers.indexOf(userId);
+      if (index === -1) {
+          return res.status(404).json({ error: 'User is not a follower of this teacher' });
+      }
 
-        // Save the updated user
-        await user.save();
+      // Remove the userId from the teacher's followers list
+      teacher.followers.splice(index, 1);
 
-        res.status(200).json({ message: 'Unfollowed user successfully' });
-    } catch (error) {
-        console.error('Error unfollowing user:', error);
-        res.status(500).json({ error: 'Server error' });
-    }
+      // Save the updated teacher document
+      await teacher.save();
+
+      res.status(200).json({ message: 'User unfollowed successfully' });
+  } catch (error) {
+      console.error('Error unfollowing user:', error);
+      res.status(500).json({ error: 'Server error' });
+  }
 });
 
 module.exports = router;

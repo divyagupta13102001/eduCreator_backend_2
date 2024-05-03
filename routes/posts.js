@@ -6,7 +6,7 @@ const Post = require('../models/post');
 const router = express.Router();
 const User = require('../models/user');
 const Subject = require('../models/Subject');
-
+const mongoose = require('mongoose');
 // Configure multer for file upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -66,6 +66,7 @@ router.post('/upload/:userId/:subjectId', upload.array('files'), async (req, res
         result = await cloudinary.uploader.upload(file.path, { resource_type: 'video' });
         uploadedFiles.push(result.secure_url);
       } else {
+     
         return res.status(400).json({ error: 'Unsupported file format' });
       }
       
@@ -180,6 +181,12 @@ router.delete('/posts/:postId/:userId', async (req, res) => {
     const postId = req.params.postId;
     const userId = req.params.userId;
 
+    // Check if the user ID and post ID are valid ObjectId strings
+    if (!mongoose.Types.ObjectId.isValid(postId) || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ error: 'Invalid ID format' });
+    }
+
+    // Find the post by ID
     const post = await Post.findById(postId);
 
     if (!post) {
@@ -188,7 +195,9 @@ router.delete('/posts/:postId/:userId', async (req, res) => {
     if (post.author.toString() !== userId) {
       return res.status(403).json({ error: 'Unauthorized: You are not the author of this post' });
     }
-    await post.delete();
+
+    // Delete the post from the database
+    await Post.deleteOne({ _id: postId });
 
     return res.status(200).json({ message: 'Post deleted successfully' });
   } catch (error) {
@@ -196,6 +205,7 @@ router.delete('/posts/:postId/:userId', async (req, res) => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 router.post("/like/:postId/:userId" , async (req, res) => {
   try {
